@@ -1,0 +1,296 @@
+/* Fix 1: Add :root variables at the very beginning */
+:root {
+    --primary-dark: #003b46;
+    --deep-navy: #071e26;
+    --cyan-accent: #00a8cc;
+    --electric-blue: #00d4ff;
+}
+
+/* Lenis Essential CSS */
+html.lenis, 
+html.lenis body { 
+    height: auto; 
+}
+
+.lenis.lenis-smooth { 
+    scroll-behavior: auto !important; 
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] { 
+    overscroll-behavior: contain; 
+}
+
+.lenis.lenis-stopped { 
+    overflow: hidden; 
+}
+
+/* Clean UI styles */
+::-webkit-scrollbar { 
+    width: 0px; 
+    display: none; 
+}
+
+body { 
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
+    background: #0a0a0a;              
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='%2300a8cc' stroke-width='0.5' opacity='0.15'/%3E%3C/svg%3E");
+    margin: 0; /* Fix 2: Add margin reset */
+    padding: 0; /* Fix 2: Add padding reset */
+}
+
+body.menu-open { 
+    overflow: hidden; 
+}
+
+/* Side scroll progress */
+#scroll-progress-container {
+    position: fixed;
+    top: 0; 
+    right: 0;
+    width: 4px; 
+    height: 100%;
+    background: rgba(0, 168, 204, 0.05);
+    z-index: 2000;
+}
+
+#scroll-progress-bar {
+    width: 100%; 
+    height: 0%;
+    background: linear-gradient(180deg, var(--cyan-accent), var(--electric-blue));
+    box-shadow: 0 0 15px rgba(0, 168, 204, 0.5);
+    transition: height 0.1s ease;
+}
+
+/* Preloader */
+#preloader {
+    position: fixed;
+    inset: 0;
+    background: #0a0a0a;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    z-index: 10000;
+    transition: opacity 0.6s ease;
+    pointer-events: none; /* Fix 3: Prevent interaction while loading */
+}
+
+.loader-logo {
+    width: 50px; 
+    height: 50px;
+    border: 3px solid rgba(0, 168, 204, 0.1);
+    border-top-color: var(--cyan-accent);
+    border-right-color: var(--electric-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { 
+    to { transform: rotate(360deg); } 
+}
+
+/* Back to top */
+#backToTop {
+    position: fixed;
+    bottom: 30px; 
+    right: 30px;
+    background: linear-gradient(135deg, var(--primary-dark), var(--cyan-accent));
+    color: white;
+    width: 52px; 
+    height: 52px;
+    border-radius: 16px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    visibility: hidden; 
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    z-index: 1500;
+    cursor: pointer;
+    box-shadow: 0 10px 25px -5px rgba(0, 168, 204, 0.4);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    text-decoration: none; /* Fix 4: Remove underline if link */
+}
+
+#backToTop.show { 
+    visibility: visible; 
+    opacity: 1; 
+    transform: translateY(0); 
+}
+
+#backToTop:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 20px 30px -5px rgba(0, 168, 204, 0.6);
+}
+
+/* Fix 5: Hamburger menu container styles (add this) */
+.hamburger-menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 24px;
+    cursor: pointer;
+    z-index: 1001;
+    position: relative;
+}
+
+.hamburger-line {
+    width: 24px;
+    height: 2px;
+    background: white;
+    border-radius: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hamburger-active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+    background: var(--cyan-accent);
+}
+
+.hamburger-active .hamburger-line:nth-child(2) {
+    opacity: 0;
+    transform: scale(0);
+}
+
+.hamburger-active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+    background: var(--cyan-accent);
+}
+
+/* Navigation link hover effect */
+.nav-link {
+    position: relative;
+    transition: color 0.3s ease;
+    text-decoration: none; /* Fix 6: Remove underline */
+    color: white; /* Fix 7: Add default color */
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan-accent), var(--electric-blue));
+    transition: transform 0.3s ease;
+    border-radius: 2px;
+}
+
+.nav-link:hover::after {
+    transform: translateX(-50%) scaleX(1);
+}
+
+/* Mobile menu enhancements */
+.mobile-link {
+    position: relative;
+    text-decoration: none;
+    color: white;
+    display: inline-block;
+    padding: 8px 0;
+}
+
+.mobile-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan-accent), var(--electric-blue));
+    transition: transform 0.3s ease;
+    border-radius: 2px;
+}
+
+.mobile-link:hover::after {
+    transform: translateX(-50%) scaleX(1);
+}
+
+/* Service dropdown item hover */
+.service-dropdown-item {
+    transition: all 0.3s ease;
+    padding: 10px 15px;
+    border-radius: 4px;
+}
+
+.service-dropdown-item:hover {
+    background: rgba(0, 168, 204, 0.1);
+    transform: translateX(5px);
+}
+
+/* Logo image style */
+.logo-img {
+    height: 36px;
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 0 8px rgba(0, 168, 204, 0.5));
+    transition: filter 0.3s ease; /* Fix 8: Add smooth transition */
+}
+
+.logo-img:hover {
+    filter: drop-shadow(0 0 12px rgba(0, 168, 204, 0.8));
+}
+
+/* Fix 9: Add mobile menu container (if not already present) */
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 300px;
+    height: 100vh;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    transition: right 0.3s ease;
+    padding: 80px 20px 20px;
+}
+
+.mobile-menu.active {
+    right: 0;
+}
+
+/* Fix 10: Add responsive adjustments */
+@media (max-width: 768px) {
+    #backToTop {
+        bottom: 20px;
+        right: 20px;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+    }
+    
+    .logo-img {
+        height: 30px;
+    }
+}
+
+/* Fix 11: Add utility classes for animations */
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fix 12: Ensure proper z-index layering */
+header {
+    position: relative;
+    z-index: 100;
+}
+
+main {
+    position: relative;
+    z-index: 1;
+} 
