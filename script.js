@@ -19,7 +19,7 @@
                 if (typeof AOS !== 'undefined' && AOS.refresh) {
                     AOS.refresh();
                 }
-                updateScrollProgress(); // Update progress bar on scroll
+                updateScrollProgress();
             });
 
             function raf(time) {
@@ -47,7 +47,6 @@
         if (progressBar) {
             const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
             progressBar.style.height = `${Math.min(progress, 100)}%`;
-            // Update background based on scroll position (white/grey theme)
             if (progress > 80) {
                 progressBar.style.background = 'linear-gradient(180deg, #ffffff, #808080)';
             } else {
@@ -76,7 +75,6 @@
             }, 600);
         });
         
-        // Fallback in case load event already fired
         if (document.readyState === 'complete') {
             preloader.style.opacity = '0';
             setTimeout(() => {
@@ -114,26 +112,21 @@
         }
     }
 
-    // Add scroll event listener for progress (fallback for non-lenis)
     window.addEventListener('scroll', () => {
         if (!window.lenis) {
             updateScrollProgress();
         }
     });
-    // Initial call
     updateScrollProgress();
 
     // ============================================
-    // MOBILE MENU & HEADER INTERACTION (theme updated to black/white/grey)
+    // MOBILE MENU & HEADER INTERACTION (FIXED VERSION)
     // ============================================
     document.addEventListener('DOMContentLoaded', () => {
         // DOM elements
         const btn = document.getElementById('mobile-menu-btn');
         const menu = document.getElementById('mobile-menu');
         const navPill = document.getElementById('nav-pill');
-        const mobileLinks = document.querySelectorAll('#mobile-menu-links a');
-        const serviceSublinks = document.querySelectorAll('#mobile-services-list a');
-        const allClickable = [...mobileLinks, ...serviceSublinks];
         const servicesToggle = document.getElementById('mobile-services-toggle');
         const servicesList = document.getElementById('mobile-services-list');
         const mobileArrow = document.getElementById('mobile-arrow');
@@ -144,115 +137,186 @@
             return;
         }
 
-        // --- Mobile services toggle (if elements exist) ---
+        // --- Mobile services toggle ---
         if (servicesToggle && servicesList && mobileArrow) {
             servicesToggle.addEventListener('click', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
+                
                 const isHidden = servicesList.classList.contains('hidden');
                 
                 if (isHidden) {
                     servicesList.classList.remove('hidden');
                     mobileArrow.style.transform = 'rotate(180deg)';
                     mobileArrow.style.transition = 'transform 0.3s ease';
-                    servicesToggle.style.color = '#ffffff'; // pure white when open
-                    servicesToggle.style.fontWeight = '600';
                 } else {
                     servicesList.classList.add('hidden');
                     mobileArrow.style.transform = 'rotate(0deg)';
-                    servicesToggle.style.color = '#808080'; // light gray when closed
-                    servicesToggle.style.fontWeight = '500';
                 }
             });
         }
 
         // --- Toggle menu function ---
         const toggleMenu = (forceState) => {
-            const isOpen = forceState !== undefined ? forceState : btn.getAttribute('aria-expanded') === 'true';
-            const newState = !isOpen;
+            const isOpen = btn.getAttribute('aria-expanded') === 'true';
+            const newState = forceState !== undefined ? forceState : !isOpen;
+            
             btn.setAttribute('aria-expanded', newState);
             
             if (newState) {
                 // Open menu
                 menu.classList.remove('opacity-0', 'invisible', 'pointer-events-none');
-                const menuContent = menu.children[0];
+                menu.classList.add('active');
+                
+                const menuContent = menu.querySelector('div');
                 if (menuContent) {
-                    menuContent.classList.remove('-translate-y-4');
-                    menuContent.classList.add('translate-y-0');
+                    menuContent.classList.remove('-translate-y-4', 'scale-95');
+                    menuContent.classList.add('translate-y-0', 'scale-100');
                 }
+                
                 document.body.classList.add('menu-open');
-                btn.classList.add('hamburger-active');
                 
                 // Reset services submenu when opening main menu
                 if (servicesList && mobileArrow) {
                     servicesList.classList.add('hidden');
                     mobileArrow.style.transform = 'rotate(0deg)';
-                    if (servicesToggle) {
-                        servicesToggle.style.color = '#808080';
-                    }
                 }
             } else {
                 // Close menu
                 menu.classList.add('opacity-0', 'invisible', 'pointer-events-none');
-                const menuContent = menu.children[0];
-                if (menuContent) {
-                    menuContent.classList.add('-translate-y-4');
-                    menuContent.classList.remove('translate-y-0');
-                }
-                document.body.classList.remove('menu-open');
-                btn.classList.remove('hamburger-active');
+                menu.classList.remove('active');
                 
-                // Reset services submenu when closing
+                const menuContent = menu.querySelector('div');
+                if (menuContent) {
+                    menuContent.classList.add('-translate-y-4', 'scale-95');
+                    menuContent.classList.remove('translate-y-0', 'scale-100');
+                }
+                
+                document.body.classList.remove('menu-open');
+                
+                // Reset services submenu
                 if (servicesList && mobileArrow) {
                     servicesList.classList.add('hidden');
                     mobileArrow.style.transform = 'rotate(0deg)';
-                    if (servicesToggle) {
-                        servicesToggle.style.color = '#808080';
-                    }
                 }
             }
         };
 
         // --- Menu button click ---
         btn.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             toggleMenu();
         });
 
-        // --- Click handlers for mobile links ---
-        allClickable.forEach(link => {
+        // --- Handle all mobile menu link clicks ---
+        const handleMobileLinkClick = (e) => {
+            const link = e.currentTarget;
+            const href = link.getAttribute('href');
+            
+            // Don't close if clicking services toggle
+            if (link.id === 'mobile-services-toggle') {
+                return;
+            }
+            
+            e.preventDefault();
+            
+            // Close menu first
+            toggleMenu(false);
+            
+            // Handle navigation after menu closes
+            setTimeout(() => {
+                if (href) {
+                    if (href.startsWith('#')) {
+                        // Internal anchor link
+                        const targetId = href.substring(1);
+                        if (targetId) {
+                            const targetElement = document.getElementById(targetId);
+                            if (targetElement) {
+                                if (window.lenis) {
+                                    window.lenis.scrollTo(targetElement, { 
+                                        duration: 1.5, 
+                                        offset: 50,
+                                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
+                                    });
+                                } else {
+                                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }
+                            } else {
+                                // If element not found, navigate to page
+                                window.location.href = href;
+                            }
+                        } else {
+                            // Just # - scroll to top
+                            if (window.lenis) {
+                                window.lenis.scrollTo(0, { duration: 1.5 });
+                            } else {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
+                        }
+                    } else {
+                        // External link or page navigation
+                        window.location.href = href;
+                    }
+                }
+            }, 300); // Wait for menu close animation
+        };
+
+        // Add click handlers to all mobile menu links
+        const allMobileLinks = document.querySelectorAll('#mobile-menu-links a');
+        allMobileLinks.forEach(link => {
+            link.addEventListener('click', handleMobileLinkClick);
+        });
+
+        // Special handling for service submenu links
+        const serviceSublinks = document.querySelectorAll('#mobile-services-list a');
+        serviceSublinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
+                
                 const href = link.getAttribute('href');
                 
                 // Close menu
                 toggleMenu(false);
                 
-                // Scroll to target
-                if (href && href.startsWith('#')) {
-                    const target = document.querySelector(href);
-                    if (target) {
-                        if (window.lenis) {
-                            window.lenis.scrollTo(target, { 
-                                duration: 1.5, 
-                                offset: 50,
-                                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-                            });
+                // Navigate after menu closes
+                setTimeout(() => {
+                    if (href) {
+                        if (href.startsWith('#')) {
+                            const targetId = href.substring(1);
+                            const targetElement = document.getElementById(targetId);
+                            if (targetElement) {
+                                if (window.lenis) {
+                                    window.lenis.scrollTo(targetElement, { 
+                                        duration: 1.5, 
+                                        offset: 50
+                                    });
+                                } else {
+                                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                                }
+                            }
                         } else {
-                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            window.location.href = href;
                         }
                     }
-                }
+                }, 300);
             });
         });
 
         // --- Close menu when clicking outside ---
-        menu.addEventListener('click', (e) => {
-            if (e.target === menu) {
+        document.addEventListener('click', (e) => {
+            if (menu.classList.contains('active') && !menu.contains(e.target) && !btn.contains(e.target)) {
                 toggleMenu(false);
             }
         });
 
-        // --- Header scroll effect (with white/grey theme) ---
+        // --- Prevent clicks inside menu from closing it (except links) ---
+        menu.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // --- Header scroll effect ---
         let lastScrollTop = 0;
         let ticking = false;
         
@@ -263,21 +327,16 @@
                 window.requestAnimationFrame(() => {
                     if (navPill) {
                         if (scrollTop > 50) {
-                            // Add background when scrolled
                             navPill.classList.add('bg-black/50', 'backdrop-blur-xl', 'border-white/10');
                             navPill.style.borderColor = 'rgba(255, 255, 255, 0.2)';
                             
-                            // Hide/show based on scroll direction
                             if (scrollTop > lastScrollTop && scrollTop > 200) {
-                                // Scrolling down - hide header
                                 navPill.style.transform = 'translateY(-120%)';
                                 navPill.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
                             } else {
-                                // Scrolling up - show header
                                 navPill.style.transform = 'translateY(0)';
                             }
                         } else {
-                            // At top - remove background
                             navPill.classList.remove('bg-black/50', 'backdrop-blur-xl', 'border-white/10');
                             navPill.style.borderColor = 'rgba(255, 255, 255, 0.1)';
                             navPill.style.transform = 'translateY(0)';
@@ -299,7 +358,7 @@
             }
         });
 
-        // --- Resize handler with debounce ---
+        // --- Resize handler ---
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
@@ -307,35 +366,31 @@
                 if (window.innerWidth >= 768 && btn.getAttribute('aria-expanded') === 'true') {
                     toggleMenu(false);
                 }
-                // Refresh AOS on resize
                 if (typeof AOS !== 'undefined' && AOS.refresh) {
                     AOS.refresh();
                 }
             }, 250);
         });
 
-        // --- Desktop menu hover effect (white/grey theme) ---
+        // --- Desktop menu hover effect ---
         const desktopMenuItems = document.querySelectorAll('.nav-link');
         desktopMenuItems.forEach(item => {
             item.addEventListener('mouseenter', () => {
                 item.style.color = '#ffffff';
-                item.style.transition = 'color 0.3s ease';
             });
             item.addEventListener('mouseleave', () => {
                 item.style.color = '#808080';
             });
         });
 
-        // --- Initialize AOS refresh after Lenis scroll (if available) ---
-        if (window.lenis && typeof AOS !== 'undefined') {
-            window.lenis.on('scroll', () => {
-                AOS.refresh();
-            });
-        }
-
-        // --- Smooth scroll for all anchor links (fallback) ---
+        // --- Smooth scroll for all anchor links ---
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', (e) => {
+                // Don't interfere with mobile menu links
+                if (anchor.closest('#mobile-menu')) {
+                    return;
+                }
+                
                 const href = anchor.getAttribute('href');
                 if (href && href !== '#') {
                     e.preventDefault();
@@ -357,5 +412,9 @@
 
         // --- Update scroll progress on initial load ---
         setTimeout(updateScrollProgress, 100);
+
+        // --- Initialize menu state ---
+        menu.classList.add('opacity-0', 'invisible', 'pointer-events-none');
+        btn.setAttribute('aria-expanded', 'false');
     });
 })();
